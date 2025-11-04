@@ -173,6 +173,25 @@
 					"TitleAlignment": "middle"
 				}
 			]
+		},
+		{
+			"Name": "Set Volume",
+			"UUID": "com.jan-blmacher.spotifyremote.set-volume",
+			"Icon": "imgs/actions/set-volume/icon",
+			"Tooltip": "Set Spotify volume to a specific level",
+			"PropertyInspectorPath": "ui/set-volume.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/set-volume/key",
+					"TitleAlignment": "middle",
+					"FontSize": 10,
+					"FontStyle": "Regular",
+					"ShowTitle": true
+				}
+			]
 		}
 	],
 	"Category": "SpotifyRemote",

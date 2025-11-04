@@ -52,6 +52,14 @@ window.$SD = {
             sendToStreamDeck('getSettings', {
                 context: context
             });
+        },
+        
+        sendToPlugin: function(uuid, payload) {
+            console.log('[SD] sendToPlugin called:', { uuid, payload });
+            sendToStreamDeck('sendToPlugin', {
+                context: uuid,
+                payload: payload
+            });
         }
     },
     
@@ -60,6 +68,15 @@ window.$SD = {
         document.addEventListener(eventName, function(e) {
             callback(e.detail);
         });
+    },
+    
+    // Expose connection and uuid for advanced usage
+    get connection() {
+        return websocket;
+    },
+    
+    get uuid() {
+        return pluginUUID;
     },
     
     pluginUUID: null,

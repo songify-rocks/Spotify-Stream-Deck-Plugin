@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="sdpi-components.js"></script>
+</head>
+<body>
+    <sdpi-item label="Target Volume (0-100%)">
+        <sdpi-range 
+            setting="targetVolume" 
+            min="0" 
+            max="100" 
+            value="50">
+        </sdpi-range>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <details class="sdpi-item-value">
+            <summary>About this action</summary>
+            <p>This action sets the Spotify volume to a specific level when pressed.</p>
+            <p><strong>Use the slider above</strong> to choose your target volume (0-100%).</p>
+            <p>The button will show:</p>
+            <ul>
+                <li>→50% - Your target volume</li>
+                <li>(35%) - Current volume (in parentheses)</li>
+            </ul>
+        </details>
+    </sdpi-item>
+</body>
+</html>
+

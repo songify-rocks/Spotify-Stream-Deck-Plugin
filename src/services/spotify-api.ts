@@ -25,6 +25,11 @@ export interface CurrentlyPlaying {
 		albumArtUrl?: string;
 		uri: string;
 	};
+	device?: {
+		volume_percent?: number;
+	};
+	shuffleState?: boolean;
+	repeatState?: string;
 }
 
 interface TokenResponse {
@@ -55,7 +60,10 @@ interface CurrentlyPlayingResponse {
 }
 
 interface PlayerStateResponse {
+	is_playing: boolean;
+	item: SpotifyTrack | null;
 	shuffle_state: boolean;
+	repeat_state: string;
 	device?: {
 		volume_percent?: number;
 	};
@@ -187,11 +195,13 @@ export class SpotifyAPI {
 	}
 
 	/**
-	 * Get currently playing track
+	 * Get currently playing track with full player state
+	 * This fetches /me/player which includes device, volume, shuffle, repeat state
 	 */
 	async getCurrentlyPlaying(): Promise<CurrentlyPlaying | null> {
 		try {
-			const response = await this.makeRequest("/me/player/currently-playing");
+			// Use /me/player instead of /me/player/currently-playing to get full state
+			const response = await this.makeRequest("/me/player");
 
 			if (response.status === 204) {
 				// No content - nothing is playing
@@ -199,11 +209,12 @@ export class SpotifyAPI {
 			}
 
 			if (!response.ok) {
-				console.error("Failed to get currently playing:", await response.text());
+				console.error("Failed to get player state:", await response.text());
 				return null;
 			}
 
-			const data = await response.json() as CurrentlyPlayingResponse;
+			const data = await response.json() as PlayerStateResponse;
+			
 			if (!data.item) {
 				return { isPlaying: false };
 			}
@@ -220,9 +231,14 @@ export class SpotifyAPI {
 					albumArtUrl: albumArt,
 					uri: track.uri,
 				},
+				device: {
+					volume_percent: data.device?.volume_percent
+				},
+				shuffleState: data.shuffle_state,
+				repeatState: data.repeat_state
 			};
 		} catch (error) {
-			console.error("Error getting currently playing:", error);
+			console.error("Error getting player state:", error);
 			return null;
 		}
 	}
@@ -430,6 +446,51 @@ export class SpotifyAPI {
 		} catch (error) {
 			console.error("Error adjusting volume:", error);
 			return false;
+		}
+	}
+
+	/**
+	 * Set volume to a specific percentage
+	 * @param volumePercent - Target volume (0-100)
+	 */
+	async setVolume(volumePercent: number): Promise<boolean> {
+		try {
+			// Clamp volume between 0 and 100
+			const targetVolume = Math.max(0, Math.min(100, volumePercent));
+			
+			// Set the new volume
+			const response = await this.makeRequest(`/me/player/volume?volume_percent=${targetVolume}`, {
+				method: "PUT",
+			});
+
+			return response.ok || response.status === 204;
+		} catch (error) {
+			console.error("Error setting volume:", error);
+			return false;
+		}
+	}
+
+	/**
+	 * Get user's playlists
+	 */
+	async getUserPlaylists(): Promise<Array<{ id: string; name: string; uri: string }>> {
+		try {
+			const response = await this.makeRequest("/me/playlists?limit=50");
+			
+			if (!response.ok) {
+				console.error("Failed to get user playlists");
+				return [];
+			}
+
+			const data = await response.json() as any;
+			return data.items.map((playlist: any) => ({
+				id: playlist.id,
+				name: playlist.name,
+				uri: playlist.uri
+			}));
+		} catch (error) {
+			console.error("Error getting user playlists:", error);
+			return [];
 		}
 	}
 

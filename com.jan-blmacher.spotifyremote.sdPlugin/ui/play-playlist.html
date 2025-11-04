@@ -2,26 +2,26 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <script src="streamdeck-connection.js"></script>
     <script src="sdpi-components.js"></script>
 </head>
 <body>
-    <sdpi-item label="Playlist URL or ID">
-        <sdpi-textfield 
-            setting="playlistId" 
-            placeholder="Paste Spotify playlist URL or ID"
-            required>
-        </sdpi-textfield>
+    <sdpi-item label="Select Playlist">
+        <select id="playlistDropdown" class="sdpi-item-value select">
+            <option value="">Loading playlists...</option>
+        </select>
     </sdpi-item>
 
     <sdpi-item label="">
         <details class="sdpi-item-value">
-            <summary>How to get Playlist URL</summary>
-            <p>To get your Spotify Playlist URL:</p>
-            <ol>
-                <li>Open Spotify and go to your playlist</li>
-                <li>Click the "..." menu → Share → Copy link to playlist</li>
-                <li><strong>Paste the entire URL here</strong></li>
-            </ol>
+            <summary>Or enter manually</summary>
+            <sdpi-item label="Playlist URL or ID">
+                <sdpi-textfield 
+                    id="playlistIdInput"
+                    setting="playlistId" 
+                    placeholder="Paste Spotify playlist URL or ID">
+                </sdpi-textfield>
+            </sdpi-item>
             <p><strong>Supported formats:</strong></p>
             <ul>
                 <li>Full URL: <code>https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M</code></li>
@@ -30,5 +30,120 @@
             </ul>
         </details>
     </sdpi-item>
+
+    <script>
+        const { streamDeckClient } = SDPIComponents;
+        let playlistDropdown = null;
+        let playlistIdInput = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            playlistDropdown = document.getElementById('playlistDropdown');
+            playlistIdInput = document.getElementById('playlistIdInput');
+
+            console.log('[PlayPlaylist] DOM loaded, fetching playlists...');
+
+            // Fetch playlists directly
+            await fetchPlaylists();
+
+            // Handle dropdown selection
+            playlistDropdown?.addEventListener('change', function() {
+                const selectedId = playlistDropdown.value;
+                if (selectedId && playlistIdInput) {
+                    playlistIdInput.value = selectedId;
+                    // Trigger change event to save
+                    playlistIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Load current setting
+            loadCurrentSetting();
+        });
+
+        async function fetchPlaylists() {
+            try {
+                // Get auth settings from global settings
+                const globalSettings = await new Promise((resolve) => {
+                    window.$SD.api.getGlobalSettings(window.$SD.pluginUUID, (settings) => {
+                        resolve(settings || {});
+                    });
+                });
+
+                if (!globalSettings.accessToken) {
+                    console.warn('[PlayPlaylist] No access token available');
+                    playlistDropdown.innerHTML = '<option value="">Please authenticate first</option>';
+                    return;
+                }
+
+                console.log('[PlayPlaylist] Fetching playlists from Spotify API...');
+
+                const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+                    headers: {
+                        'Authorization': `Bearer ${globalSettings.accessToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('[PlayPlaylist] Failed to fetch playlists:', response.status);
+                    playlistDropdown.innerHTML = '<option value="">Failed to load playlists</option>';
+                    return;
+                }
+
+                const data = await response.json();
+                const playlists = data.items.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    uri: item.uri
+                }));
+
+                console.log('[PlayPlaylist] ✓ Fetched', playlists.length, 'playlists');
+                populatePlaylistDropdown(playlists);
+            } catch (error) {
+                console.error('[PlayPlaylist] Error fetching playlists:', error);
+                playlistDropdown.innerHTML = '<option value="">Error loading playlists</option>';
+            }
+        }
+
+        function populatePlaylistDropdown(playlists) {
+            if (!playlistDropdown) return;
+
+            playlistDropdown.innerHTML = '<option value="">-- Select a playlist --</option>';
+
+            if (!playlists || playlists.length === 0) {
+                playlistDropdown.innerHTML += '<option value="" disabled>No playlists found</option>';
+                return;
+            }
+
+            playlists.forEach(playlist => {
+                const option = document.createElement('option');
+                option.value = playlist.id;
+                option.textContent = playlist.name;
+                playlistDropdown.appendChild(option);
+            });
+
+            console.log('[PlayPlaylist] ✓ Populated dropdown with', playlists.length, 'playlists');
+        }
+
+        async function loadCurrentSetting() {
+            try {
+                const settings = await new Promise((resolve) => {
+                    const context = window.$SD.actionInfo?.context || window.$SD.uuid;
+                    window.$SD.api.getSettings(window.$SD.pluginUUID, context, (settings) => {
+                        resolve(settings || {});
+                    });
+                });
+
+                if (settings.playlistId && playlistDropdown) {
+                    // Try to select in dropdown
+                    const options = Array.from(playlistDropdown.options);
+                    const matchingOption = options.find(opt => opt.value === settings.playlistId);
+                    if (matchingOption) {
+                        playlistDropdown.value = settings.playlistId;
+                    }
+                }
+            } catch (error) {
+                console.error('[PlayPlaylist] Error loading settings:', error);
+            }
+        }
+    </script>
 </body>
 </html>

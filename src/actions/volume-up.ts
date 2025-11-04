@@ -30,14 +30,14 @@ export class VolumeUp extends SingletonAction<VolumeUpSettings> {
 		// Update volume display immediately
 		await this.updateVolumeDisplay(action);
 
-		// Set up interval to update volume every 5 seconds
+		// Set up interval to update volume every 2 seconds
 		if (this.updateIntervals.has(actionId)) {
 			clearInterval(this.updateIntervals.get(actionId)!);
 		}
 
 		const interval = setInterval(async () => {
 			await this.updateVolumeDisplay(action);
-		}, 5000);
+		}, 2000); // Update every 2 seconds to sync with player state manager
 
 		this.updateIntervals.set(actionId, interval);
 	}

@@ -20,7 +20,8 @@ const actionIcons = {
     'repeat-mode.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/repeat-mode',
     'like-song.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/like-song',
     'volume-up.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/volume-up',
-    'volume-down.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/volume-down'
+    'volume-down.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/volume-down',
+    'sliders.svg': 'com.jan-blmacher.spotifyremote.sdPlugin/imgs/actions/set-volume'
 };
 
 const pluginIcons = {
