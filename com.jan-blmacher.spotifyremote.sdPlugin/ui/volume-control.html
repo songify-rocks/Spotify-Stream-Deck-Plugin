@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="sdpi-components.js"></script>
+</head>
+<body>
+    <sdpi-item label="Volume Step (%)">
+        <sdpi-textfield 
+            setting="volumeStep" 
+            type="number" 
+            min="1" 
+            max="100" 
+            value="10"
+            placeholder="10">
+        </sdpi-textfield>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <details class="sdpi-item-value">
+            <summary>How to use</summary>
+            <p>Set the percentage by which to adjust the volume each time you press the button. Default is 10%.</p>
+        </details>
+    </sdpi-item>
+</body>
+</html>

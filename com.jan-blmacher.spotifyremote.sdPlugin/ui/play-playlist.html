@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="sdpi-components.js"></script>
+</head>
+<body>
+    <sdpi-item label="Playlist URL or ID">
+        <sdpi-textfield 
+            setting="playlistId" 
+            placeholder="Paste Spotify playlist URL or ID"
+            required>
+        </sdpi-textfield>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <details class="sdpi-item-value">
+            <summary>How to get Playlist URL</summary>
+            <p>To get your Spotify Playlist URL:</p>
+            <ol>
+                <li>Open Spotify and go to your playlist</li>
+                <li>Click the "..." menu → Share → Copy link to playlist</li>
+                <li><strong>Paste the entire URL here</strong></li>
+            </ol>
+            <p><strong>Supported formats:</strong></p>
+            <ul>
+                <li>Full URL: <code>https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M</code></li>
+                <li>Spotify URI: <code>spotify:playlist:37i9dQZF1DXcBWIGoYBM5M</code></li>
+                <li>Just the ID: <code>37i9dQZF1DXcBWIGoYBM5M</code></li>
+            </ul>
+        </details>
+    </sdpi-item>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="sdpi-components.js"></script>
+</head>
+<body>
+    <sdpi-item label="Client ID">
+        <sdpi-textfield 
+            id="clientId"
+            placeholder="Your Spotify Client ID">
+        </sdpi-textfield>
+    </sdpi-item>
+
+    <sdpi-item label="Client Secret">
+        <sdpi-password 
+            id="clientSecret"
+            placeholder="Your Spotify Client Secret">
+        </sdpi-password>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <sdpi-button id="authenticateBtn">Authenticate with Spotify</sdpi-button>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <details class="sdpi-item-value">
+            <summary>How to authenticate</summary>
+            <ol>
+                <li>Enter your Spotify Client ID and Secret above</li>
+                <li>Click "Authenticate with Spotify"</li>
+                <li>Complete the authentication in your browser</li>
+                <li>Copy the tokens from the callback page</li>
+                <li>Paste them in the import field below</li>
+            </ol>
+        </details>
+    </sdpi-item>
+
+    <hr />
+
+    <sdpi-item label="Import Tokens">
+        <sdpi-textarea 
+            id="importString"
+            placeholder="Paste your authentication tokens here (JSON format)"
+            rows="4">
+        </sdpi-textarea>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <sdpi-button id="importBtn">Import Tokens</sdpi-button>
+    </sdpi-item>
+
+    <script>
+        const { streamDeckClient } = SDPIComponents;
+        
+        // Store reference to elements
+        let authenticateBtn = null;
+        let importBtn = null;
+        let importStringTextarea = null;
+        let clientIdInput = null;
+        let clientSecretInput = null;
+
+        // Function to save to global settings
+        async function saveToGlobalSettings(key, value) {
+            try {
+                const currentSettings = await streamDeckClient.getGlobalSettings();
+                const newSettings = {
+                    ...currentSettings,
+                    [key]: value
+                };
+                await streamDeckClient.setGlobalSettings(newSettings);
+                console.log(`Saved ${key} to global settings`);
+            } catch (error) {
+                console.error(`Error saving ${key}:`, error);
+            }
+        }
+
+        // Function to load from global settings
+        async function loadGlobalSettings() {
+            try {
+                const settings = await streamDeckClient.getGlobalSettings();
+                console.log('Loaded global settings:', settings);
+                
+                if (clientIdInput && settings.clientId) {
+                    clientIdInput.value = settings.clientId;
+                }
+                if (clientSecretInput && settings.clientSecret) {
+                    clientSecretInput.value = settings.clientSecret;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            authenticateBtn = document.getElementById('authenticateBtn');
+            importBtn = document.getElementById('importBtn');
+            importStringTextarea = document.getElementById('importString');
+            clientIdInput = document.getElementById('clientId');
+            clientSecretInput = document.getElementById('clientSecret');
+
+            // Load existing settings
+            await loadGlobalSettings();
+
+            // Save Client ID on change
+            clientIdInput?.addEventListener('change', function() {
+                saveToGlobalSettings('clientId', clientIdInput.value.trim());
+            });
+
+            // Save Client Secret on change
+            clientSecretInput?.addEventListener('change', function() {
+                saveToGlobalSettings('clientSecret', clientSecretInput.value.trim());
+            });
+
+            // Handle authenticate button
+            authenticateBtn?.addEventListener('click', async function() {
+                try {
+                    const clientId = clientIdInput?.value?.trim();
+                    const clientSecret = clientSecretInput?.value?.trim();
+
+                    if (!clientId || !clientSecret) {
+                        alert('Please enter both Client ID and Client Secret first');
+                        return;
+                    }
+
+                    // Save credentials before opening auth
+                    await saveToGlobalSettings('clientId', clientId);
+                    await saveToGlobalSettings('clientSecret', clientSecret);
+
+                    const scopes = [
+                        'user-read-playback-state',
+                        'user-modify-playback-state',
+                        'user-read-currently-playing',
+                        'user-library-modify'
+                    ].join(' ');
+
+                    const authUrl = 'https://accounts.spotify.com/authorize?' +
+                        'client_id=' + encodeURIComponent(clientId) + '&' +
+                        'response_type=code&' +
+                        'redirect_uri=' + encodeURIComponent('https://spotify.overcode.tv/callback') + '&' +
+                        'scope=' + encodeURIComponent(scopes);
+
+                    // Try multiple methods to open URL
+                    if (streamDeckClient && streamDeckClient.openUrl) {
+                        streamDeckClient.openUrl(authUrl);
+                    } else {
+                        window.open(authUrl, '_blank');
+                    }
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    alert('Error starting authentication: ' + error.message);
+                }
+            });
+
+            // Handle import button
+            importBtn?.addEventListener('click', async function() {
+                try {
+                    const importString = importStringTextarea?.value?.trim();
+                    
+                    if (!importString) {
+                        alert('Please paste the import string first');
+                        return;
+                    }
+
+                    let parsedTokens = null;
+
+                    // Try parsing as JSON
+                    try {
+                        const tokens = JSON.parse(importString);
+                        if (tokens.accessToken && tokens.refreshToken) {
+                            parsedTokens = {
+                                accessToken: tokens.accessToken,
+                                refreshToken: tokens.refreshToken,
+                                clientId: tokens.clientId,
+                                clientSecret: tokens.clientSecret
+                            };
+                        } else if (tokens.access_token && tokens.refresh_token) {
+                            parsedTokens = {
+                                accessToken: tokens.access_token,
+                                refreshToken: tokens.refresh_token,
+                                clientId: tokens.client_id,
+                                clientSecret: tokens.client_secret
+                            };
+                        }
+                    } catch (jsonError) {
+                        // Try URL params
+                        const urlParams = new URLSearchParams(importString);
+                        const accessToken = urlParams.get('accessToken') || urlParams.get('access_token');
+                        const refreshToken = urlParams.get('refreshToken') || urlParams.get('refresh_token');
+                        
+                        if (accessToken && refreshToken) {
+                            parsedTokens = {
+                                accessToken: accessToken,
+                                refreshToken: refreshToken
+                            };
+                        } else {
+                            // Try base64
+                            try {
+                                const decoded = atob(importString);
+                                const tokens = JSON.parse(decoded);
+                                if (tokens.accessToken && tokens.refreshToken) {
+                                    parsedTokens = tokens;
+                                }
+                            } catch (base64Error) {
+                                alert('Could not parse import string. Please check the format.');
+                                return;
+                            }
+                        }
+                    }
+
+                    if (!parsedTokens || !parsedTokens.accessToken || !parsedTokens.refreshToken) {
+                        alert('Invalid token format. Please check the import string.');
+                        return;
+                    }
+
+                    // Get current settings and merge
+                    const currentSettings = await streamDeckClient.getSettings();
+                    const newSettings = {
+                        ...currentSettings,
+                        ...parsedTokens
+                    };
+
+                    // Save to global settings
+                    await streamDeckClient.setGlobalSettings(newSettings);
+                    
+                    // Clear the textarea
+                    importStringTextarea.value = '';
+                    
+                    alert('Tokens imported successfully!');
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('Error importing tokens: ' + error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

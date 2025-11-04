@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="sdpi-components.js"></script>
+</head>
+<body>
+    <sdpi-item label="Repeat Mode">
+        <sdpi-select setting="repeatMode">
+            <option value="off">Off</option>
+            <option value="track">Repeat Track</option>
+            <option value="context">Repeat Context (Playlist/Album)</option>
+        </sdpi-select>
+    </sdpi-item>
+
+    <sdpi-item label="">
+        <details class="sdpi-item-value">
+            <summary>Repeat Mode Options</summary>
+            <ul>
+                <li><strong>Off:</strong> No repeat</li>
+                <li><strong>Repeat Track:</strong> Repeat the current track</li>
+                <li><strong>Repeat Context:</strong> Repeat the current playlist or album</li>
+            </ul>
+        </details>
+    </sdpi-item>
+</body>
+</html>

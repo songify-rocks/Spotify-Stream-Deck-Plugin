@@ -1,0 +1,202 @@
+{
+	"Name": "SpotifyRemote",
+	"Version": "0.1.0.0",
+	"Author": "Jan Blömacher",
+	"Actions": [
+		{
+			"Name": "Now Playing",
+			"UUID": "com.jan-blmacher.spotifyremote.now-playing",
+			"Icon": "imgs/actions/now-playing/icon",
+			"Tooltip": "Displays the currently playing track on Spotify with marquee scrolling",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/now-playing/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10,
+					"FontStyle": "Bold",
+					"FontUnderline": false,
+					"ShowTitle": true,
+					"TitleColor": "#FFFFFF"
+				}
+			]
+		},
+		{
+			"Name": "Next",
+			"UUID": "com.jan-blmacher.spotifyremote.next",
+			"Icon": "imgs/actions/next/icon",
+			"Tooltip": "Skip to the next track",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/next/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Previous",
+			"UUID": "com.jan-blmacher.spotifyremote.previous",
+			"Icon": "imgs/actions/previous/icon",
+			"Tooltip": "Go to the previous track",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/previous/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Play/Pause",
+			"UUID": "com.jan-blmacher.spotifyremote.play-pause",
+			"Icon": "imgs/actions/play-pause/icon",
+			"Tooltip": "Toggle play/pause",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/play-pause/key-play",
+					"Name": "Paused (Show Play)",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/play-pause/key-pause",
+					"Name": "Playing (Show Pause)",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Play Playlist",
+			"UUID": "com.jan-blmacher.spotifyremote.play-playlist",
+			"Icon": "imgs/actions/play-playlist/icon",
+			"Tooltip": "Play a specific Spotify playlist",
+			"PropertyInspectorPath": "ui/play-playlist.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/play-playlist/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Toggle Shuffle",
+			"UUID": "com.jan-blmacher.spotifyremote.toggle-shuffle",
+			"Icon": "imgs/actions/toggle-shuffle/icon",
+			"Tooltip": "Toggle shuffle mode",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/toggle-shuffle/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Repeat Mode",
+			"UUID": "com.jan-blmacher.spotifyremote.repeat-mode",
+			"Icon": "imgs/actions/repeat-mode/icon",
+			"Tooltip": "Set repeat mode (off, track, context)",
+			"PropertyInspectorPath": "ui/repeat-mode.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/repeat-mode/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Like Song",
+			"UUID": "com.jan-blmacher.spotifyremote.like-song",
+			"Icon": "imgs/actions/like-song/icon",
+			"Tooltip": "Save the currently playing track to your library",
+			"PropertyInspectorPath": "ui/authentication.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/like-song/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Volume Up",
+			"UUID": "com.jan-blmacher.spotifyremote.volume-up",
+			"Icon": "imgs/actions/volume-up/icon",
+			"Tooltip": "Increase volume by a configurable percentage",
+			"PropertyInspectorPath": "ui/volume-control.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/volume-up/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Volume Down",
+			"UUID": "com.jan-blmacher.spotifyremote.volume-down",
+			"Icon": "imgs/actions/volume-down/icon",
+			"Tooltip": "Decrease volume by a configurable percentage",
+			"PropertyInspectorPath": "ui/volume-control.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/volume-down/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		}
+	],
+	"Category": "SpotifyRemote",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "Remote control Spotify from the Stream Deck",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 2,
+	"Software": {
+		"MinimumVersion": "6.5"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "com.jan-blmacher.spotifyremote"
+}
