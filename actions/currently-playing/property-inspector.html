@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify Configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 15px;
+      margin: 0;
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #a0a0a0;
+    }
+    input {
+      padding: 8px;
+      background: #2d2d2d;
+      border: 1px solid #3d3d3d;
+      color: #ffffff;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #1db954;
+    }
+    button {
+      padding: 10px;
+      background: #1db954;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1ed760;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .info {
+      font-size: 11px;
+      color: #888;
+      margin-top: 5px;
+    }
+    .status {
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+    .status.success {
+      background: #1db954;
+      color: white;
+    }
+    .status.error {
+      background: #e22134;
+      color: white;
+    }
+    .status.info {
+      background: #2d2d2d;
+      color: #a0a0a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="section">
+      <label for="clientId">Spotify Client ID</label>
+      <input type="text" id="clientId" placeholder="Enter your Spotify Client ID">
+      <div class="info">Get this from Spotify Developer Dashboard</div>
+    </div>
+
+    <div class="section">
+      <label for="clientSecret">Spotify Client Secret</label>
+      <input type="password" id="clientSecret" placeholder="Enter your Spotify Client Secret">
+      <div class="info">Keep this secure!</div>
+    </div>
+
+    <div class="section">
+      <button id="authButton">Authorize Spotify</button>
+      <div class="info">Click to open authorization page</div>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <script src="https://developer.elgato.com/documentation/stream-deck-sdk/js-sdk/stream-deck.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    
+    let websocket = null;
+    let registerEvent = null;
+
+    // Connect to Stream Deck
+    function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+      registerEvent = inRegisterEvent;
+      
+      websocket = new WebSocket('ws://localhost:' + inPort);
+
+      websocket.onopen = () => {
+        const json = {
+          event: inRegisterEvent,
+          uuid: inUUID
+        };
+        websocket.send(JSON.stringify(json));
+        
+        // Request current settings
+        const getSettings = {
+          event: 'getSettings',
+          context: inUUID
+        };
+        websocket.send(JSON.stringify(getSettings));
+      };
+
+      websocket.onmessage = (evt) => {
+        const data = JSON.parse(evt.data);
+        
+        if (data.event === 'didReceiveSettings') {
+          const settings = data.payload.settings;
+          if (settings.clientId) $('clientId').value = settings.clientId;
+          if (settings.clientSecret) $('clientSecret').value = settings.clientSecret;
+          updateAuthButton();
+        } else if (data.event === 'sendToPropertyInspector') {
+          // Receive data from plugin
+          const payload = data.payload;
+          if (payload.clientId) $('clientId').value = payload.clientId;
+          if (payload.clientSecret) $('clientSecret').value = payload.clientSecret;
+          updateAuthButton();
+        }
+      };
+    }
+
+    function showStatus(message, type = 'info') {
+      const statusDiv = $('status');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      setTimeout(() => {
+        statusDiv.textContent = '';
+        statusDiv.className = '';
+      }, 5000);
+    }
+
+    function updateAuthButton() {
+      const hasCredentials = $('clientId').value && $('clientSecret').value;
+      $('authButton').disabled = !hasCredentials;
+    }
+
+    $('clientId').addEventListener('input', () => {
+      updateAuthButton();
+      saveSettings();
+    });
+
+    $('clientSecret').addEventListener('input', () => {
+      updateAuthButton();
+      saveSettings();
+    });
+
+    $('authButton').addEventListener('click', () => {
+      const clientId = $('clientId').value.trim();
+      const clientSecret = $('clientSecret').value.trim();
+
+      if (!clientId || !clientSecret) {
+        showStatus('Please enter both Client ID and Secret', 'error');
+        return;
+      }
+
+      // Generate state for security
+      const state = Math.random().toString(36).substring(2, 15);
+      
+      // Spotify OAuth scopes
+      const scopes = [
+        'user-read-playback-state',
+        'user-modify-playback-state',
+        'user-read-currently-playing',
+        'user-library-modify',
+        'user-read-playback-position'
+      ].join(' ');
+
+      const redirectUri = encodeURIComponent('http://localhost:8888/callback');
+      const authUrl = `https://accounts.spotify.com/authorize?` +
+        `client_id=${encodeURIComponent(clientId)}&` +
+        `response_type=code&` +
+        `redirect_uri=${redirectUri}&` +
+        `scope=${encodeURIComponent(scopes)}&` +
+        `state=${state}`;
+
+      // Store state and credentials temporarily
+      sessionStorage.setItem('oauth_state', state);
+      sessionStorage.setItem('client_id', clientId);
+      sessionStorage.setItem('client_secret', clientSecret);
+
+      // Open authorization URL
+      window.open(authUrl, '_blank');
+
+      showStatus('Authorization page opened. Complete the flow and paste the callback URL here.', 'info');
+      
+      // Prompt for callback URL
+      setTimeout(() => {
+        const callbackUrl = prompt('After authorizing, paste the full callback URL here:');
+        if (callbackUrl) {
+          handleCallback(callbackUrl, clientId, clientSecret);
+        }
+      }, 1000);
+    });
+
+    async function handleCallback(callbackUrl, clientId, clientSecret) {
+      try {
+        const url = new URL(callbackUrl);
+        const code = url.searchParams.get('code');
+        const state = url.searchParams.get('state');
+
+        if (!code) {
+          showStatus('Invalid callback URL - no authorization code found', 'error');
+          return;
+        }
+
+        showStatus('Exchanging authorization code for tokens...', 'info');
+
+        // Exchange code for tokens via token exchange server
+        const response = await fetch('http://localhost:8888/exchange', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code: code,
+            client_id: clientId,
+            client_secret: clientSecret,
+            redirect_uri: 'http://localhost:8888/callback'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Token exchange failed');
+        }
+
+        const tokens = await response.json();
+
+        // Save settings
+        const settings = {
+          clientId: clientId,
+          clientSecret: clientSecret,
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          tokenExpiry: Date.now() + (tokens.expires_in * 1000)
+        };
+
+        saveSettings(settings);
+        
+        // Also send to plugin via sendToPlugin event
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+          const sendToPlugin = {
+            event: 'sendToPlugin',
+            action: 'com.spotify.streamdeck.currently-playing',
+            context: inUUID,
+            payload: {
+              accessToken: tokens.access_token,
+              refreshToken: tokens.refresh_token,
+              tokenExpiry: Date.now() + (tokens.expires_in * 1000)
+            }
+          };
+          websocket.send(JSON.stringify(sendToPlugin));
+        }
+        
+        showStatus('Authorization successful!', 'success');
+      } catch (error) {
+        console.error('Authorization error:', error);
+        showStatus('Authorization failed: ' + error.message, 'error');
+      }
+    }
+
+    function saveSettings(additionalSettings = {}) {
+      if (!websocket) return;
+
+      const settings = {
+        clientId: $('clientId').value.trim(),
+        clientSecret: $('clientSecret').value.trim(),
+        ...additionalSettings
+      };
+
+      const json = {
+        event: 'setSettings',
+        context: registerEvent ? registerEvent.split('.').pop() : '',
+        payload: {
+          settings: settings
+        }
+      };
+      websocket.send(JSON.stringify(json));
+    }
+  </script>
+</body>
+</html>

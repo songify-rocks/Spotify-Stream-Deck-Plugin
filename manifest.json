@@ -1,0 +1,135 @@
+{
+  "Author": "OSS Contributor",
+  "Name": "Spotify Controller",
+  "Description": "Control Spotify playback from your Stream Deck",
+  "Icon": "icon.png",
+  "URL": "https://github.com/yourusername/spotify-streamdeck-plugin",
+  "Version": "1.0.0",
+  "CodePath": "plugin",
+  "Category": "Music",
+  "CategoryIcon": "category.png",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "5.0"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.11"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Actions": [
+    {
+      "Name": "Currently Playing",
+      "UUID": "com.spotify.streamdeck.currently-playing",
+      "Icon": "actions/currently-playing/icon.png",
+      "States": [
+        {
+          "Image": "actions/currently-playing/key.png"
+        }
+      ],
+      "PropertyInspectorPath": "actions/currently-playing/property-inspector.html",
+      "Tooltip": "Show currently playing track"
+    },
+    {
+      "Name": "Next Track",
+      "UUID": "com.spotify.streamdeck.next",
+      "Icon": "actions/next/icon.png",
+      "States": [
+        {
+          "Image": "actions/next/key.png"
+        }
+      ],
+      "Tooltip": "Play next track"
+    },
+    {
+      "Name": "Previous Track",
+      "UUID": "com.spotify.streamdeck.previous",
+      "Icon": "actions/previous/icon.png",
+      "States": [
+        {
+          "Image": "actions/previous/key.png"
+        }
+      ],
+      "Tooltip": "Play previous track"
+    },
+    {
+      "Name": "Play/Pause",
+      "UUID": "com.spotify.streamdeck.play-pause",
+      "Icon": "actions/play-pause/icon.png",
+      "States": [
+        {
+          "Image": "actions/play-pause/key-pause.png",
+          "Title": "Pause",
+          "TitleAlignment": "middle"
+        },
+        {
+          "Image": "actions/play-pause/key-play.png",
+          "Title": "Play",
+          "TitleAlignment": "middle"
+        }
+      ],
+      "Tooltip": "Toggle play/pause"
+    },
+    {
+      "Name": "Volume Up",
+      "UUID": "com.spotify.streamdeck.volume-up",
+      "Icon": "actions/volume-up/icon.png",
+      "States": [
+        {
+          "Image": "actions/volume-up/key.png"
+        }
+      ],
+      "Tooltip": "Increase volume"
+    },
+    {
+      "Name": "Volume Down",
+      "UUID": "com.spotify.streamdeck.volume-down",
+      "Icon": "actions/volume-down/icon.png",
+      "States": [
+        {
+          "Image": "actions/volume-down/key.png"
+        }
+      ],
+      "Tooltip": "Decrease volume"
+    },
+    {
+      "Name": "Play Playlist",
+      "UUID": "com.spotify.streamdeck.play-playlist",
+      "Icon": "actions/play-playlist/icon.png",
+      "States": [
+        {
+          "Image": "actions/play-playlist/key.png"
+        }
+      ],
+      "PropertyInspectorPath": "actions/play-playlist/property-inspector.html",
+      "Tooltip": "Play selected playlist"
+    },
+    {
+      "Name": "Like Song",
+      "UUID": "com.spotify.streamdeck.like-song",
+      "Icon": "actions/like-song/icon.png",
+      "States": [
+        {
+          "Image": "actions/like-song/key.png"
+        }
+      ],
+      "Tooltip": "Add current song to liked songs"
+    },
+    {
+      "Name": "Repeat Mode",
+      "UUID": "com.spotify.streamdeck.repeat-mode",
+      "Icon": "actions/repeat-mode/icon.png",
+      "States": [
+        {
+          "Image": "actions/repeat-mode/key.png"
+        }
+      ],
+      "Tooltip": "Toggle repeat mode"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# This file prevents tokens.json from being committed to version control
+tokens.json
+*.log
+node_modules/
+.DS_Store
