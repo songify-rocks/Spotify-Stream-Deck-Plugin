@@ -3,7 +3,7 @@
   "Name": "Spotify Controller",
   "Description": "Control Spotify playback from your Stream Deck",
   "Icon": "icon.png",
-  "URL": "https://github.com/yourusername/spotify-streamdeck-plugin",
+  "URL": "https://github.com/songify-rocks/Spotify-Stream-Deck-Plugin",
   "Version": "1.0.0",
   "CodePath": "plugin",
   "Category": "Music",
